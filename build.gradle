@@ -1,6 +1,7 @@
 apply plugin: 'scala'
 
 ext.scala_version = '2.9.1'
+ext.jersey_version = '1.12'
 ext.description = 'Accessing various calculation tasks'
 ext.classes_directory = new File('classes')
 
@@ -75,8 +76,6 @@ dependencies
 	
 	compile group: 'org.scala-lang', name: 'scala-library', version: scala_version
 	scalaCompile group: 'org.scala-lang', name: 'scala-library', version: scala_version
-	
-	jersey_version = '1.12'
 	
 	scalaCompile group: 'asm', name: 'asm', version: '3.3.1'
 	scalaCompile group: 'javax.ws.rs', name: 'jsr311-api', version: '1.1.1'
