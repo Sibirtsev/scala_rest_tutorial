@@ -1,3 +1,4 @@
+// используем язык Scala
 apply plugin: 'scala'
 
 ext.scala_version = '2.9.1'
@@ -5,6 +6,7 @@ ext.jersey_version = '1.12'
 ext.description = 'Accessing various calculation tasks'
 ext.classes_directory = new File('classes')
 
+// вспомогательная функция удаления папки — аналог «rm -rf»
 def delete_folder(File folder)
 {
 	if (folder.isDirectory())
@@ -26,12 +28,15 @@ def delete_folder(File folder)
 	return folder.delete()
 }
 
+// эта задача очищает папку «classes» — можете запустить вручную, если будет нужно
 task clean_output_folders <<
 {
 	delete_folder(classes_directory)
 	classes_directory.mkdirs()
 }
 
+// основная задача — запускает наш веб-сервис
+// сначала запускает «compileJava» и «compileScalaScala», а потом уже выполняется сама
 task go(dependsOn: ['compileJava', 'compileScalaScala'], type: JavaExec) {
 	main = 'Main'
 	classpath = sourceSets.main.runtimeClasspath
@@ -40,42 +45,47 @@ task go(dependsOn: ['compileJava', 'compileScalaScala'], type: JavaExec) {
 	systemProperty 'port', '8090'
 }
 
+// наборы исходных кодов
 sourceSets
 {
+	// главный - Ява
 	main
 	{
 		java
 		{
+			// исходники искать в папке «sources»
 			srcDir 'sources'
 		}
-		resources
-		{
-			srcDir 'resources'
-		}
 	}
+	// ещё один - Scala
 	scala
 	{
 		scala
 		{
+			// исходники искать в папке «sources»
 			srcDir 'sources'
 		}
 	}
 }
 
+// скомпилированные Ява-классы класть в папку «classes»
 sourceSets.main.output.classesDir = 'classes'
-sourceSets.main.output.resourcesDir = 'classes'
 		
+// скомпилированные Scala-классы класть в папку «classes»
 sourceSets.scala.output.classesDir = 'classes'
-sourceSets.scala.output.resourcesDir = 'classes'
 
+// используемые библиотеки
 dependencies
 {
-	// Libraries needed to run the scala tools
+	// служебные библиотеки для обработки Scala из Gradle
 	scalaTools group: 'org.scala-lang', name: 'scala-compiler', version: scala_version
 	scalaTools group: 'org.scala-lang', name: 'scala-library', version: scala_version
 	
+	// сама Scala, нужна для компиляции кода на Scala
 	compile group: 'org.scala-lang', name: 'scala-library', version: scala_version
 	scalaCompile group: 'org.scala-lang', name: 'scala-library', version: scala_version
+	
+	// прочие библиотеки, используемые в программе
 	
 	scalaCompile group: 'asm', name: 'asm', version: '3.3.1'
 	scalaCompile group: 'javax.ws.rs', name: 'jsr311-api', version: '1.1.1'
@@ -95,6 +105,9 @@ dependencies
 	runtime group: 'com.sun.jersey', name: 'jersey-bundle', version: jersey_version
 	runtime group: 'com.sun.jersey', name: 'jersey-grizzly2', version: jersey_version
 	
+	// до кучи можно просто класть jar-ники в папку «libraries», 
+	// и они тоже подхватятся в качестве библиотек
+	
 	scalaCompile fileTree(dir: 'libraries', include: '*.jar')
 	scalaCompile files('classes')
 	
@@ -102,13 +115,18 @@ dependencies
 	runtime files('classes')
 }
 
+// компилирует код на Scala
 compileScala
 {
+	// какой-то «демон» для Scala — убыстряет компиляцию
 	scalaCompileOptions.useCompileDaemon = true
+	// куда
 	destinationDir = file('classes')
+	// откуда
 	source = file('sources')
 }
 
+// откуда качать используемые библиотеки
 repositories
 {
     mavenCentral()
