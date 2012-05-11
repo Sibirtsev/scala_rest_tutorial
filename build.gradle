@@ -1,0 +1,116 @@
+apply plugin: 'scala'
+
+ext.scala_version = '2.9.1'
+ext.description = 'Accessing various calculation tasks'
+ext.classes_directory = new File('classes')
+
+def delete_folder(File folder)
+{
+	if (folder.isDirectory())
+	{
+		String[] children = folder.list()
+		int i = 0
+		while (i < children.length)
+		{
+			boolean success = delete_folder(new File(folder, children[i]))
+			if (!success)
+			{
+				return false
+			}
+			i++
+		}
+	}
+	
+	// The directory is now empty so delete it
+	return folder.delete()
+}
+
+task clean_output_folders <<
+{
+	delete_folder(classes_directory)
+	classes_directory.mkdirs()
+}
+
+task go(dependsOn: ['compileJava', 'compileScalaScala'], type: JavaExec) {
+	main = 'Main'
+	classpath = sourceSets.main.runtimeClasspath
+	standardInput = System.in
+	//args 'arguments`'
+	systemProperty 'port', '8090'
+}
+
+sourceSets
+{
+	main
+	{
+		java
+		{
+			srcDir 'sources'
+		}
+		resources
+		{
+			srcDir 'resources'
+		}
+	}
+	scala
+	{
+		scala
+		{
+			srcDir 'sources'
+		}
+	}
+}
+
+sourceSets.main.output.classesDir = 'classes'
+sourceSets.main.output.resourcesDir = 'classes'
+		
+sourceSets.scala.output.classesDir = 'classes'
+sourceSets.scala.output.resourcesDir = 'classes'
+
+dependencies
+{
+	// Libraries needed to run the scala tools
+	scalaTools group: 'org.scala-lang', name: 'scala-compiler', version: scala_version
+	scalaTools group: 'org.scala-lang', name: 'scala-library', version: scala_version
+	
+	compile group: 'org.scala-lang', name: 'scala-library', version: scala_version
+	scalaCompile group: 'org.scala-lang', name: 'scala-library', version: scala_version
+	
+	jersey_version = '1.12'
+	
+	scalaCompile group: 'asm', name: 'asm', version: '3.3.1'
+	scalaCompile group: 'javax.ws.rs', name: 'jsr311-api', version: '1.1.1'
+	scalaCompile group: 'com.sun.jersey', name: 'jersey-bundle', version: jersey_version
+	scalaCompile group: 'com.sun.jersey', name: 'jersey-client', version: jersey_version
+	scalaCompile group: 'com.sun.jersey', name: 'jersey-core', version: jersey_version
+	scalaCompile group: 'com.sun.jersey', name: 'jersey-server', version: jersey_version
+	scalaCompile group: 'com.sun.jersey', name: 'jersey-grizzly2', version: jersey_version
+	scalaCompile group: 'com.sun.jersey', name: 'jersey-bundle', version: jersey_version
+
+	runtime group: 'asm', name: 'asm', version: '3.3.1'
+	runtime group: 'javax.ws.rs', name: 'jsr311-api', version: '1.1.1'
+	runtime group: 'com.sun.jersey', name: 'jersey-bundle', version: jersey_version
+	runtime group: 'com.sun.jersey', name: 'jersey-client', version: jersey_version
+	runtime group: 'com.sun.jersey', name: 'jersey-core', version: jersey_version
+	runtime group: 'com.sun.jersey', name: 'jersey-server', version: jersey_version
+	runtime group: 'com.sun.jersey', name: 'jersey-bundle', version: jersey_version
+	runtime group: 'com.sun.jersey', name: 'jersey-grizzly2', version: jersey_version
+	
+	scalaCompile fileTree(dir: 'libraries', include: '*.jar')
+	scalaCompile files('classes')
+	
+	runtime fileTree(dir: 'libraries', include: '*.jar')
+	runtime files('classes')
+}
+
+compileScala
+{
+	scalaCompileOptions.useCompileDaemon = true
+	destinationDir = file('classes')
+	source = file('sources')
+}
+
+repositories
+{
+    mavenCentral()
+}

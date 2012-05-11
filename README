@@ -1,0 +1,11 @@
+Create a RESTful web service with Scala in 15 minutes.
+
+Uses: 
+Scala, Java, Gradle, Grizzly, Jersey.
+
+Running: 
+gradle go
+
+Checking: 
+http://localhost:8090/захѣшировать/SHA/Господи Исѹсе Христе Сыне Божиi помилѹй мѧ грѣшнаго
+http://localhost:8090/захѣшировать/Whirlpool/Господи Исѹсе Христе Сыне Божиi помилѹй мѧ грѣшнаго
