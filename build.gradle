@@ -36,8 +36,8 @@ task clean_output_folders <<
 }
 
 // основная задача — запускает наш веб-сервис
-// сначала запускает «compileJava» и «compileScalaScala», а потом уже выполняется сама
-task go(dependsOn: ['compileJava', 'compileScalaScala'], type: JavaExec) {
+// сначала запускает «compileJava» и «compileScala», а потом уже выполняется сама
+task go(dependsOn: ['compileJava', 'compileScala'], type: JavaExec) {
 	main = 'Main'
 	classpath = sourceSets.main.runtimeClasspath
 	standardInput = System.in
@@ -56,10 +56,6 @@ sourceSets
 			// исходники искать в папке «sources»
 			srcDir 'sources'
 		}
-	}
-	// ещё один - Scala
-	scala
-	{
 		scala
 		{
 			// исходники искать в папке «sources»
@@ -70,9 +66,6 @@ sourceSets
 
 // скомпилированные Ява-классы класть в папку «classes»
 sourceSets.main.output.classesDir = 'classes'
-		
-// скомпилированные Scala-классы класть в папку «classes»
-sourceSets.scala.output.classesDir = 'classes'
 
 // используемые библиотеки
 dependencies
@@ -83,18 +76,17 @@ dependencies
 	
 	// сама Scala, нужна для компиляции кода на Scala
 	compile group: 'org.scala-lang', name: 'scala-library', version: scala_version
-	scalaCompile group: 'org.scala-lang', name: 'scala-library', version: scala_version
 	
 	// прочие библиотеки, используемые в программе
 	
-	scalaCompile group: 'asm', name: 'asm', version: '3.3.1'
-	scalaCompile group: 'javax.ws.rs', name: 'jsr311-api', version: '1.1.1'
-	scalaCompile group: 'com.sun.jersey', name: 'jersey-bundle', version: jersey_version
-	scalaCompile group: 'com.sun.jersey', name: 'jersey-client', version: jersey_version
-	scalaCompile group: 'com.sun.jersey', name: 'jersey-core', version: jersey_version
-	scalaCompile group: 'com.sun.jersey', name: 'jersey-server', version: jersey_version
-	scalaCompile group: 'com.sun.jersey', name: 'jersey-grizzly2', version: jersey_version
-	scalaCompile group: 'com.sun.jersey', name: 'jersey-bundle', version: jersey_version
+	compile group: 'asm', name: 'asm', version: '3.3.1'
+	compile group: 'javax.ws.rs', name: 'jsr311-api', version: '1.1.1'
+	compile group: 'com.sun.jersey', name: 'jersey-bundle', version: jersey_version
+	compile group: 'com.sun.jersey', name: 'jersey-client', version: jersey_version
+	compile group: 'com.sun.jersey', name: 'jersey-core', version: jersey_version
+	compile group: 'com.sun.jersey', name: 'jersey-server', version: jersey_version
+	compile group: 'com.sun.jersey', name: 'jersey-grizzly2', version: jersey_version
+	compile group: 'com.sun.jersey', name: 'jersey-bundle', version: jersey_version
 
 	runtime group: 'asm', name: 'asm', version: '3.3.1'
 	runtime group: 'javax.ws.rs', name: 'jsr311-api', version: '1.1.1'
@@ -108,22 +100,11 @@ dependencies
 	// до кучи можно просто класть jar-ники в папку «libraries», 
 	// и они тоже подхватятся в качестве библиотек
 	
-	scalaCompile fileTree(dir: 'libraries', include: '*.jar')
-	scalaCompile files('classes')
+	compile fileTree(dir: 'libraries', include: '*.jar')
+	compile files('classes')
 	
 	runtime fileTree(dir: 'libraries', include: '*.jar')
 	runtime files('classes')
-}
-
-// компилирует код на Scala
-compileScala
-{
-	// какой-то «демон» для Scala — убыстряет компиляцию
-	scalaCompileOptions.useCompileDaemon = true
-	// куда
-	destinationDir = file('classes')
-	// откуда
-	source = file('sources')
 }
 
 // откуда качать используемые библиотеки

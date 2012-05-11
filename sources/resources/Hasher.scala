@@ -26,7 +26,7 @@ class Hasher
 		if (что == "")
 			throw new IllegalArgumentException("Что захешировать?")
 	
-		Json.build(Map("hash" -> Whirlpool.hash(что))).toString
+		Json.build(Map("что" -> что, "хѣш" -> Whirlpool.hash(что))).toString
 	}
 
 	@GET 
@@ -37,6 +37,6 @@ class Hasher
 		if (что == "")
 			throw new IllegalArgumentException("Что захешировать?")
 	
-		Json.build(Map("hash" -> SHA.hash(что))).toString
+		Json.build(Map("что" -> что, "хѣш" -> SHA.hash(что))).toString
 	}
 }
