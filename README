@@ -1,7 +1,7 @@
-Create a RESTful web service with Scala in 15 minutes.
+Create a simple RESTful web service with Scala.
 
 Uses: 
-Scala, Java, Gradle, Grizzly, Jersey.
+Scala, Java, Gradle, Scalatra, Jetty.
 
 Running: 
 gradle go

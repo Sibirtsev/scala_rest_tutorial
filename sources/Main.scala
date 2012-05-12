@@ -1,62 +1,42 @@
-import com.sun.jersey.api.container.grizzly.GrizzlyWebContainerFactory
-import org.glassfish.grizzly.http.server.HttpServer
+import org.mortbay.jetty.Server
+import org.mortbay.jetty.servlet.{Context, ServletHolder}
 
-import javax.ws.rs.core.UriBuilder
-import java.io.IOException
-import java.net.URI
-import java.util.HashMap
-import java.util.Map
-
-import java.lang.Integer
-
-import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory
-
-import com.sun.jersey.api.core._
-import java.io._
+import tools._
 
 object Main
 {
-    def port (default_port : Integer) : Integer =
+	def main(args: Array[String]) 
 	{
-        val port = System.getProperty("port")
-        if (port == null)
-			return default_port
+		val server = new Server(Some[Int](System.getProperty("port").toInt).getOrElse(8080))
+		val root = new Context(server, "/", Context.SESSIONS)
+		
+		val package_name : String = System.getProperty("package")
+		for (handler <- PackageScanner.getClasses(package_name) if handler.getGenericSuperclass() == classOf[org.scalatra.ScalatraServlet])
+		{
+			var subpackage = handler.getPackage().getName()
+			subpackage = subpackage.substring(package_name.length)
+			if (subpackage.startsWith("."))
+				subpackage = subpackage.substring(1)
+				
+			val servlet = handler.newInstance().asInstanceOf[javax.servlet.Servlet]
 			
-		try
-		{
-			return Integer.parseInt(port)
+			var path = ""
+			
+			try
+			{
+				path = handler.getMethod("path").invoke(servlet).toString
+			}
+			catch 
+			{
+				case ioe: NoSuchMethodException => 
+					path = subpackage.replaceAll(".", "/")
+			}
+			
+			root.addServlet(new ServletHolder(servlet), path + "/*")
 		}
-		catch
-		{
-			case ошибка : NumberFormatException => {}
-		}
-        
-		default_port
-    }
-    
-    def адрес () : URI =
-	{
-        UriBuilder.fromUri("http://localhost/").port(port(8080)).build()
-    }
-
-    val Адрес = адрес()
-
-	@throws (classOf[IOException])
-    def запустить () : HttpServer =
-	{
-        System.out.println("Starting grizzly...")
 		
-        val настройки = new PackagesResourceConfig("resources")
-        GrizzlyServerFactory.createHttpServer(Адрес, настройки)
-    }
-    
-	@throws (classOf[IOException])
-    def main (настройки : Array[String]) =
-	{
-		val server = запустить()
-		
-		System.in.read()
-
-		server.stop()
-    }    
+		server.start()
+		server.join()
+	}
 }
+
