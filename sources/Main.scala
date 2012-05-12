@@ -1,4 +1,4 @@
-import org.mortbay.jetty.Server
+п»їimport org.mortbay.jetty.Server
 import org.mortbay.jetty.servlet.{Context, ServletHolder}
 
 import tools._
@@ -7,47 +7,47 @@ object Main
 {
 	def main(args: Array[String]) 
 	{
-		// создаём Jetty
+		// СЃРѕР·РґР°С‘Рј Jetty
 		val server = new Server(Some[Int](System.getProperty("port").toInt).getOrElse(8080))
 		val root = new Context(server, "/", Context.SESSIONS)
 		
-		// в каком пакете искать наши Rest веб-сервисы
+		// РІ РєР°РєРѕРј РїР°РєРµС‚Рµ РёСЃРєР°С‚СЊ РЅР°С€Рё Rest РІРµР±-СЃРµСЂРІРёСЃС‹
 		val package_name : String = System.getProperty("package")
 		
-		// каждый класс ScalatraServlet из этого пакета (и подпакетов) "замапить" на свой путь.
-		// либо путь определяется методом "path" этого класса, либо совпадает с путём пакета 
-		// (web.test.path.Servlet из пакета web будет "замаплен" на "/test/path/*", если не существует метода web.test.path.Servlet.path())
+		// РєР°Р¶РґС‹Р№ РєР»Р°СЃСЃ ScalatraServlet РёР· СЌС‚РѕРіРѕ РїР°РєРµС‚Р° (Рё РїРѕРґРїР°РєРµС‚РѕРІ) "Р·Р°РјР°РїРёС‚СЊ" РЅР° СЃРІРѕР№ РїСѓС‚СЊ.
+		// Р»РёР±Рѕ РїСѓС‚СЊ РѕРїСЂРµРґРµР»СЏРµС‚СЃСЏ РјРµС‚РѕРґРѕРј "path" СЌС‚РѕРіРѕ РєР»Р°СЃСЃР°, Р»РёР±Рѕ СЃРѕРІРїР°РґР°РµС‚ СЃ РїСѓС‚С‘Рј РїР°РєРµС‚Р° 
+		// (web.test.path.Servlet РёР· РїР°РєРµС‚Р° web Р±СѓРґРµС‚ "Р·Р°РјР°РїР»РµРЅ" РЅР° "/test/path/*", РµСЃР»Рё РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚ РјРµС‚РѕРґР° web.test.path.Servlet.path())
 		for (handler <- PackageScanner.getClasses(package_name) if handler.getGenericSuperclass() == classOf[org.scalatra.ScalatraServlet])
 		{
-			// вычисляем название подпакета этого класса
+			// РІС‹С‡РёСЃР»СЏРµРј РЅР°Р·РІР°РЅРёРµ РїРѕРґРїР°РєРµС‚Р° СЌС‚РѕРіРѕ РєР»Р°СЃСЃР°
 			var subpackage = handler.getPackage().getName()
 			subpackage = subpackage.substring(package_name.length)
 			if (subpackage.startsWith("."))
 				subpackage = subpackage.substring(1)
 				
-			// создаём сервлет из этого класса
+			// СЃРѕР·РґР°С‘Рј СЃРµСЂРІР»РµС‚ РёР· СЌС‚РѕРіРѕ РєР»Р°СЃСЃР°
 			val servlet = handler.newInstance().asInstanceOf[javax.servlet.Servlet]
 			
-			// на какой путь "замапим" сервлет
+			// РЅР° РєР°РєРѕР№ РїСѓС‚СЊ "Р·Р°РјР°РїРёРј" СЃРµСЂРІР»РµС‚
 			var path = ""
 			
 			try
 			{
-				// либо из метода path()
+				// Р»РёР±Рѕ РёР· РјРµС‚РѕРґР° path()
 				path = handler.getMethod("path").invoke(servlet).toString
 			}
 			catch 
 			{
-				// либо из названия подпакета
+				// Р»РёР±Рѕ РёР· РЅР°Р·РІР°РЅРёСЏ РїРѕРґРїР°РєРµС‚Р°
 				case ioe: NoSuchMethodException => 
 					path = subpackage.replaceAll(".", "/")
 			}
 			
-			// "мапим" сервлет на этот путь в Jetty
+			// "РјР°РїРёРј" СЃРµСЂРІР»РµС‚ РЅР° СЌС‚РѕС‚ РїСѓС‚СЊ РІ Jetty
 			root.addServlet(new ServletHolder(servlet), path + "/*")
 		}
 		
-		// запускаем Jetty
+		// Р·Р°РїСѓСЃРєР°РµРј Jetty
 		server.start()
 		server.join()
 	}
