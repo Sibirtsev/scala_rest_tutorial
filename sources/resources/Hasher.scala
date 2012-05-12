@@ -12,7 +12,6 @@ import com.twitter.json.Json
 class Hasher
 {	
 	@GET 
-	@Produces(Array("text/plain"))
 	def приветствие() : String =
 	{
 		"Доступные алгоритмы: Whirlpool, SHA"
@@ -20,23 +19,15 @@ class Hasher
 
 	@GET 
 	@Path("Whirlpool/{что}")
-	@Produces(Array(MediaType.APPLICATION_JSON))
 	def whirlpool(@DefaultValue("") @PathParam("что") что : String) : String =
 	{
-		if (что == "")
-			throw new IllegalArgumentException("Что захешировать?")
-	
 		Json.build(Map("что" -> что, "хѣш" -> Whirlpool.hash(что))).toString
 	}
 
 	@GET 
 	@Path("SHA/{что}")
-	@Produces(Array(MediaType.APPLICATION_JSON))
 	def sha(@DefaultValue("") @PathParam("что") что : String) : String =
 	{
-		if (что == "")
-			throw new IllegalArgumentException("Что захешировать?")
-	
 		Json.build(Map("что" -> что, "хѣш" -> SHA.hash(что))).toString
 	}
 }
