@@ -15,8 +15,7 @@ object Main
 		val package_name : String = System.getProperty("package")
 		
 		// каждый класс ScalatraServlet из этого пакета (и подпакетов) "замапить" на свой путь.
-		// либо путь определяется методом "path" этого класса, либо совпадает с путём пакета 
-		// (web.test.path.Servlet из пакета web будет "замаплен" на "/test/path/*", если не существует метода web.test.path.Servlet.path())
+		// путь определяется методом "path" этого класса.
 		for (handler <- PackageScanner.getClasses(package_name) if handler.getGenericSuperclass() == classOf[org.scalatra.ScalatraServlet])
 		{
 			// создаём сервлет из этого класса
@@ -44,4 +43,3 @@ object Main
 		server.join()
 	}
 }
-
