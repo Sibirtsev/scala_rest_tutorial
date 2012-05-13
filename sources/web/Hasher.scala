@@ -1,13 +1,9 @@
 package web
 
-import org.scalatra._
-
 import hash.Whirlpool
 import hash.SHA
 
-import com.twitter.json.Json
-
-class Hasher extends ScalatraServlet 
+class Hasher extends tools.WebService 
 {
 	def path = "/захѣшировать"
 	
@@ -19,12 +15,12 @@ class Hasher extends ScalatraServlet
 	get("/Whirlpool/:what") 
 	{
 		val что = params("what")
-		Json.build(Map("что" -> что, "хѣш" -> Whirlpool.hash(что))).toString
+		json("что" -> что, "хѣш" -> Whirlpool.hash(что))
 	}
 
 	get("/SHA/:what") 
 	{
 		val что = params("what")
-		Json.build(Map("что" -> что, "хѣш" -> SHA.hash(что))).toString
+		json("что" -> что, "хѣш" -> SHA.hash(что))
 	}
 }

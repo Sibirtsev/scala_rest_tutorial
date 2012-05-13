@@ -1,4 +1,4 @@
-﻿import org.mortbay.jetty.Server
+import org.mortbay.jetty.Server
 import org.mortbay.jetty.servlet.{Context, ServletHolder}
 
 import tools._
@@ -16,7 +16,7 @@ object Main
 		
 		// каждый класс ScalatraServlet из этого пакета (и подпакетов) "замапить" на свой путь.
 		// путь определяется методом "path" этого класса.
-		for (handler <- PackageScanner.getClasses(package_name) if handler.getGenericSuperclass() == classOf[org.scalatra.ScalatraServlet])
+		for (handler <- PackageScanner.getClasses(package_name) if classOf[org.scalatra.ScalatraServlet].isAssignableFrom(handler))
 		{
 			// создаём сервлет из этого класса
 			val servlet = handler.newInstance().asInstanceOf[javax.servlet.Servlet]
@@ -29,6 +29,8 @@ object Main
 				
 				// "мапим" сервлет на этот путь в Jetty
 				root.addServlet(new ServletHolder(servlet), path + "/*")
+				
+				System.out.println(handler.getPackage().getName() + "." + handler.getName() + " is mapped to " + path)
 			}
 			catch 
 			{
