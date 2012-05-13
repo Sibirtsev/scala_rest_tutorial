@@ -19,32 +19,24 @@ object Main
 		// (web.test.path.Servlet из пакета web будет "замаплен" на "/test/path/*", если не существует метода web.test.path.Servlet.path())
 		for (handler <- PackageScanner.getClasses(package_name) if handler.getGenericSuperclass() == classOf[org.scalatra.ScalatraServlet])
 		{
-			// вычисляем название подпакета этого класса
-			var subpackage = handler.getPackage().getName()
-			subpackage = subpackage.substring(package_name.length)
-			if (subpackage.startsWith("."))
-				subpackage = subpackage.substring(1)
-				
 			// создаём сервлет из этого класса
 			val servlet = handler.newInstance().asInstanceOf[javax.servlet.Servlet]
 			
 			// на какой путь "замапим" сервлет
-			var path = ""
-			
 			try
 			{
-				// либо из метода path()
-				path = handler.getMethod("path").invoke(servlet).toString
+				// получаем это из метода path()
+				val path = handler.getMethod("path").invoke(servlet).toString
+				
+				// "мапим" сервлет на этот путь в Jetty
+				root.addServlet(new ServletHolder(servlet), path + "/*")
 			}
 			catch 
 			{
-				// либо из названия подпакета
+				// не написан метод path() у сервлета
 				case ioe: NoSuchMethodException => 
-					path = subpackage.replaceAll(".", "/")
+					throw new RuntimeException("Method path() not found in class " + handler.getPackage().getName() + "." + handler.getName())
 			}
-			
-			// "мапим" сервлет на этот путь в Jetty
-			root.addServlet(new ServletHolder(servlet), path + "/*")
 		}
 		
 		// запускаем Jetty
