@@ -4,36 +4,6 @@ apply plugin: 'scala'
 ext.scala_version = '2.9.1'
 ext.jersey_version = '1.12'
 ext.description = 'Accessing various calculation tasks'
-ext.classes_directory = new File('classes')
-
-// вспомогательная функция удаления папки — аналог «rm -rf»
-def delete_folder(File folder)
-{
-	if (folder.isDirectory())
-	{
-		String[] children = folder.list()
-		int i = 0
-		while (i < children.length)
-		{
-			boolean success = delete_folder(new File(folder, children[i]))
-			if (!success)
-			{
-				return false
-			}
-			i++
-		}
-	}
-	
-	// The directory is now empty so delete it
-	return folder.delete()
-}
-
-// эта задача очищает папку «classes» — можете запустить вручную, если будет нужно
-task clean_output_folders <<
-{
-	delete_folder(classes_directory)
-	classes_directory.mkdirs()
-}
 
 // основная задача — запускает наш веб-сервис
 // сначала запускает «compileJava» и «compileScala», а потом уже выполняется сама
@@ -41,7 +11,6 @@ task go(dependsOn: ['compileJava', 'compileScala'], type: JavaExec) {
 	main = 'Main'
 	classpath = sourceSets.main.runtimeClasspath
 	standardInput = System.in
-	//args 'arguments`'
 	systemProperty 'package', 'web'
 	systemProperty 'port', '8090'
 }
@@ -49,23 +18,23 @@ task go(dependsOn: ['compileJava', 'compileScala'], type: JavaExec) {
 // наборы исходных кодов
 sourceSets
 {
-	// главный - Ява
+	// главный
 	main
 	{
 		java
 		{
-			// исходники искать в папке «sources»
+			// исходники Явы искать в папке «sources»
 			srcDir 'sources'
 		}
 		scala
 		{
-			// исходники искать в папке «sources»
+			// исходники Scala искать в папке «sources»
 			srcDir 'sources'
 		}
 	}
 }
 
-// скомпилированные Ява-классы класть в папку «classes»
+// скомпилированные классы класть в папку «classes»
 sourceSets.main.output.classesDir = 'classes'
 
 // используемые библиотеки
@@ -74,9 +43,6 @@ dependencies
 	// служебные библиотеки для обработки Scala из Gradle
 	scalaTools group: 'org.scala-lang', name: 'scala-compiler', version: scala_version
 	scalaTools group: 'org.scala-lang', name: 'scala-library', version: scala_version
-	
-	// сама Scala, нужна для компиляции кода на Scala
-	compile group: 'org.scala-lang', name: 'scala-library', version: scala_version
 	
 	// прочие библиотеки, используемые в программе
 	
@@ -87,16 +53,12 @@ dependencies
 	runtime group: 'org.mortbay.jetty', name: 'jetty', version: '7.0.0.pre5'
 		
 	compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.0.1'
-	runtime group: 'javax.servlet', name: 'javax.servlet-api', version: '3.0.1'
             
 	// до кучи можно просто класть jar-ники в папку «libraries», 
 	// и они тоже подхватятся в качестве библиотек
 	
 	compile fileTree(dir: 'libraries', include: '*.jar')
-	compile files('classes')
-	
 	runtime fileTree(dir: 'libraries', include: '*.jar')
-	runtime files('classes')
 }
 
 // откуда качать используемые библиотеки
